@@ -136,4 +136,38 @@ abstract class AbstractRequest extends \Omnipay\Common\Message\AbstractRequest
     {
         return $this->response = new Response($this, $data);
     }
+
+    /**
+     * Whether or not to request a token with this request.
+     *
+     * @param  int $value 0: Do not have the gateway return a token in the response
+     *                    1: Ask the gateway to return a token in the response
+     */
+    public function setCreateToken($value)
+    {
+        $this->setParameter('createToken', $value);
+    }
+
+    public function getCreateToken()
+    {
+        return $this->getParameter('createToken', 0);
+    }
+
+    /**
+     * Whether or not to store the existing token when you use it
+     *
+     * @param  int $value 0: Token used in this request will no be available in
+     *                       the future
+     *                    1: Token used in this request will remain available
+     *                       for future use
+     */
+    public function setStoreToken($value)
+    {
+        $this->setParameter('storeToken', $value);
+    }
+
+    public function getStoreToken()
+    {
+        return $this->getParameter('storeToken', 0);
+    }
 }

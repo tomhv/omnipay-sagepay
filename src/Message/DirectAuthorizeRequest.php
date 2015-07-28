@@ -15,7 +15,13 @@ class DirectAuthorizeRequest extends AbstractRequest
 
     protected function getBaseAuthorizeData()
     {
-        $this->validate('amount', 'card', 'transactionId');
+        // no need to validate card for Token transactions
+        $this->validate('amount', 'transactionId');
+
+        if (!$this->getCardReference()) {
+            $this->validate('card');
+        }
+
         $card = $this->getCard();
 
         $data = $this->getBaseData();
@@ -26,9 +32,17 @@ class DirectAuthorizeRequest extends AbstractRequest
         $data['ClientIPAddress'] = $this->getClientIp();
         $data['ApplyAVSCV2'] = $this->getApplyAVSCV2() ?: 0;
         $data['Apply3DSecure'] = $this->getApply3DSecure() ?: 0;
+        $data['StoreToken'] = $this->getStoreToken();
 
         if ($this->getReferrerId()) {
             $data['ReferrerID'] = $this->getReferrerId();
+        }
+
+        // if we have a card reference (token), use it
+        if ($this->getCardReference()) {
+            $data['Token'] = $this->getCardReference();
+        } else {
+            $data['CreateToken'] = $this->getCreateToken();
         }
 
         // billing details
@@ -60,6 +74,13 @@ class DirectAuthorizeRequest extends AbstractRequest
     public function getData()
     {
         $data = $this->getBaseAuthorizeData();
+
+        // if we have a card reference (token) we don't need any other card
+        // data
+        if ($this->getCardReference()) {
+            return $data;
+        }
+
         $this->getCard()->validate();
 
         $data['CardHolder'] = $this->getCard()->getName();
